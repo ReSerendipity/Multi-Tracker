@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bilibili Comments"
+  short_description: "通过已登录Chrome导出B站视频一级评论和二级回复"
+  default_prompt: "Use $bilibili-comments to fetch all comments for a Bilibili video URL."

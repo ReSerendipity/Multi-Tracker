@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bili Following Latest"
+  short_description: "Download tracked Feishu creators' latest Bilibili videos."
+  default_prompt: "下载飞书博主表里持续跟踪博主的最新 B 站视频，并写回视频表和任务日志。"

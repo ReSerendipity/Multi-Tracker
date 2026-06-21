@@ -1,0 +1,31 @@
+# Python cache and local virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+feishu-base-config.json
+lark-auth-qrcode.png
+
+# Runtime state
+.codex/
+.tmp-lark/
+*.log
+*.err.log
+
+# Downloaded media, transcripts, browser profiles, and smoke-test outputs
+downloads/
+bilibili-download-test/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/

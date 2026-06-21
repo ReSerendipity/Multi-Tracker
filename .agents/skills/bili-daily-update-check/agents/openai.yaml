@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bili Daily Check"
+  short_description: "Check today Bilibili updates."
+  default_prompt: "检查今天持续跟踪博主是否有 B 站新视频；有则下载并写回飞书视频表和任务日志。"

@@ -1,0 +1,32 @@
+{
+  "base_name": "Example Base",
+  "base_token": "YOUR_BASE_TOKEN",
+  "base_url": "https://example.feishu.cn/base/...",
+  "profile": "default",
+  "tables": {
+    "default": {
+      "name": "Example Table",
+      "table_id": "YOUR_TABLE_ID"
+    },
+    "creators": {
+      "name": "Creators",
+      "table_id": "YOUR_TABLE_ID"
+    },
+    "videos": {
+      "name": "Videos",
+      "table_id": "YOUR_TABLE_ID"
+    },
+    "video_metric_snapshots": {
+      "name": "Video Metric Snapshots",
+      "table_id": "YOUR_TABLE_ID"
+    },
+    "crawl_task_logs": {
+      "name": "Crawl Task Logs",
+      "table_id": "YOUR_TABLE_ID"
+    },
+    "video_comments": {
+      "name": "Video Comments",
+      "table_id": "YOUR_TABLE_ID"
+    }
+  }
+}
