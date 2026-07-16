@@ -10,7 +10,9 @@ Local ingestion scripts for tracking AI creators on Bilibili and Douyin, downloa
 - `download_douyin_latest.py`: download latest videos from configured Douyin creators.
 - `sync_douyin_to_feishu.py`: sync local Douyin download artifacts into Feishu.
 - `enrich_douyin_feishu.py`: backfill Douyin insight fields from local artifacts.
-- `publish_transcript_docs_to_feishu.py`: create Feishu docs from local transcripts and write document URLs back to Base.
+- `write_transcript_content_to_feishu.py`: write agent-authored transcript summaries and key points to Feishu, then verify them by readback.
+- `publish_transcript_docs_to_feishu.py`: create or update Feishu docs from local transcripts and write document URLs back to Base.
+- `.agents/skills/video-transcript-doc-writer/`: turn cleaned transcripts into structured, readable spoken-script curation JSON.
 - `.agents/skills/`: project-local Codex skills for repeated crawl/comment workflows.
 
 ## Local Setup
@@ -58,8 +60,13 @@ Run Douyin latest-video download:
 python .\download_douyin_latest.py --videos-per-creator 1
 ```
 
-Preview transcript doc publishing without writing Feishu:
+Preview transcript content writeback and doc publishing without writing Feishu:
 
 ```powershell
-python .\publish_transcript_docs_to_feishu.py --dry-run
+python .\write_transcript_content_to_feishu.py --curation-file .\downloads\manifests\YOUR_CURATION.json --record-id YOUR_RECORD_ID --dry-run
+python .\publish_transcript_docs_to_feishu.py --record-id YOUR_RECORD_ID --update-existing --curation-file .\downloads\manifests\YOUR_CURATION.json --parent-position my_library --dry-run
 ```
+
+## Codex Automation Example
+
+See [`CODEX_AUTOMATION_EXAMPLE.md`](./CODEX_AUTOMATION_EXAMPLE.md) for a Codex App daily automation example covering Bilibili/Douyin ingestion, machine transcription, agent-written readable spoken scripts, Feishu document publishing, manifest verification, and concise failure reporting.

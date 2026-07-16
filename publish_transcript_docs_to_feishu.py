@@ -37,6 +37,8 @@ VIDEO_FIELDS = [
     "关联博主",
     "发布时间",
     "时长秒",
+    "内容摘要",
+    "关键要点",
     "清洗文案路径",
     "原始文案路径",
     "视频文案路径",
@@ -211,6 +213,65 @@ def clean_transcript_paragraphs(text):
     return [item for item in output if item]
 
 
+def load_curation_file(path):
+    if not path:
+        return {}
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(payload, dict) and "records" in payload:
+        payload = payload["records"]
+    if not isinstance(payload, dict):
+        raise ValueError("--curation-file must be a JSON object or {'records': {...}}")
+    return payload
+
+
+def curation_for_row(curations, row):
+    keys = [row.get("_record_id"), row.get("BVID"), row.get("平台视频ID"), row.get("视频标题")]
+    for key in keys:
+        if key and str(key) in curations:
+            value = curations[str(key)]
+            if not isinstance(value, dict):
+                raise ValueError(f"curation for {key} must be an object")
+            return value
+    return {}
+
+
+def normalize_readable_sections(curation):
+    sections = curation.get("readable_sections")
+    if not isinstance(sections, list) or not sections:
+        raise ValueError("curation.readable_sections must be a non-empty list")
+    normalized = []
+    for index, section in enumerate(sections, start=1):
+        if not isinstance(section, dict):
+            raise ValueError(f"readable_sections[{index}] must be an object")
+        heading = str(section.get("heading") or "").strip()
+        paragraphs = section.get("paragraphs")
+        if not heading:
+            raise ValueError(f"readable_sections[{index}].heading is required")
+        if isinstance(paragraphs, str):
+            paragraphs = [paragraphs]
+        if not isinstance(paragraphs, list):
+            raise ValueError(f"readable_sections[{index}].paragraphs must be a list")
+        paragraphs = [str(item).strip() for item in paragraphs if str(item).strip()]
+        if not paragraphs:
+            raise ValueError(f"readable_sections[{index}].paragraphs cannot be empty")
+        normalized.append({"heading": heading, "paragraphs": paragraphs})
+    return normalized
+
+
+def compact_length(text):
+    return len(re.sub(r"\s+", "", str(text or "")))
+
+
+def text_blocks(value):
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    text = str(value or "").strip()
+    if not text:
+        return []
+    lines = [line.strip().lstrip("-• ").strip() for line in text.splitlines() if line.strip()]
+    return lines or [text]
+
+
 def xml_text(value):
     return html.escape(str(value or ""), quote=True)
 
@@ -244,7 +305,8 @@ def doc_title(row, creators_by_record_id):
     return " - ".join(parts)[:120]
 
 
-def build_doc_xml(row, source_field, source_path, transcript_text, creators_by_record_id):
+def build_doc_xml(row, source_field, source_path, transcript_text, creators_by_record_id, curation=None):
+    curation = curation or {}
     title = doc_title(row, creators_by_record_id)
     platform = infer_platform(row)
     creator = creator_names(row, creators_by_record_id)
@@ -277,7 +339,31 @@ def build_doc_xml(row, source_field, source_path, transcript_text, creators_by_r
     ]
     if video_url:
         body.extend(["<h2>原视频链接</h2>", f'<p><a type="url-preview" href="{video_url}">打开原视频</a></p>'])
-    body.append("<h2>正文口播稿</h2>")
+    body.append("<h2>内容摘要</h2>")
+    summary_blocks = text_blocks(row.get("内容摘要"))
+    body.extend(f"<p>{xml_text(item)}</p>" for item in summary_blocks or ["Base 记录暂无内容摘要。"])
+    body.append("<h2>关键要点</h2>")
+    key_point_blocks = text_blocks(row.get("关键要点"))
+    if key_point_blocks:
+        body.append("<ul>")
+        body.extend(f"<li>{xml_text(item)}</li>" for item in key_point_blocks)
+        body.append("</ul>")
+    else:
+        body.append("<p>Base 记录暂无关键要点。</p>")
+    if curation:
+        readable_sections = normalize_readable_sections(curation)
+        quality_note = str(curation.get("quality_note") or "").strip()
+        body.append("<h2>口播稿（可读版）</h2>")
+        if quality_note:
+            body.append(f"<p>{xml_text(quality_note)}</p>")
+        for section in readable_sections:
+            body.append(f"<h3>{xml_text(section['heading'])}</h3>")
+            body.extend(f"<p>{xml_text(paragraph)}</p>" for paragraph in section["paragraphs"])
+        body.append("<h2>原始转写稿与来源说明</h2>")
+        body.append(f"<p>{xml_text(f'来源字段：{source_field}；本地路径：{source_path}')}</p>")
+        body.append("<h3>原始转写稿</h3>")
+    else:
+        body.append("<h2>正文口播稿</h2>")
     if paragraphs:
         body.extend(f"<p>{xml_text(paragraph)}</p>" for paragraph in paragraphs)
     else:
@@ -317,6 +403,45 @@ def run_docs_create(config, xml_content, *, parent_token=None, parent_position=N
         data = bili.safe_json_from_stdout(result.stdout)
         if not data.get("ok"):
             raise RuntimeError(f"docs +create returned not ok: {json.dumps(data, ensure_ascii=False)[:2000]}")
+        return data
+    finally:
+        content_path.unlink(missing_ok=True)
+
+
+def run_docs_update_overwrite(config, doc_url, xml_content, *, attempts=6, base_delay=20.0):
+    tmp_dir = ROOT / ".tmp-lark"
+    tmp_dir.mkdir(exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".xml", dir=tmp_dir, delete=False) as handle:
+        handle.write(xml_content)
+        content_path = Path(handle.name)
+    try:
+        result = run_command_with_retry(
+            [
+                "lark-cli",
+                "--profile",
+                config["profile"],
+                "docs",
+                "+update",
+                "--api-version",
+                "v2",
+                "--as",
+                "user",
+                "--doc",
+                doc_url,
+                "--command",
+                "overwrite",
+                "--content",
+                f"@{content_path.relative_to(ROOT)}",
+                "--format",
+                "json",
+            ],
+            timeout=180,
+            attempts=attempts,
+            base_delay=base_delay,
+        )
+        data = bili.safe_json_from_stdout(result.stdout)
+        if not data.get("ok"):
+            raise RuntimeError(f"docs +update returned not ok: {json.dumps(data, ensure_ascii=False)[:2000]}")
         return data
     finally:
         content_path.unlink(missing_ok=True)
@@ -415,10 +540,10 @@ def select_rows(rows, args):
     return selected[:limit] if limit is not None else selected
 
 
-def process_row(config, row, creators_by_record_id, args):
+def process_row(config, row, creators_by_record_id, curations, args):
     record_id = row["_record_id"]
     existing_url = extract_url(row.get(TRANSCRIPT_FIELD))
-    if existing_url and not args.overwrite:
+    if existing_url and not args.overwrite and not args.update_existing:
         return {
             "status": "skipped",
             "reason": "existing_doc_url",
@@ -435,7 +560,18 @@ def process_row(config, row, creators_by_record_id, args):
         }
 
     transcript_text = read_text(source_path)
-    xml_content = build_doc_xml(row, source_field, source_path, transcript_text, creators_by_record_id)
+    curation = curation_for_row(curations, row)
+    if args.curation_file and not curation:
+        raise ValueError(f"no curation found for record: {record_id}")
+    readable_sections = normalize_readable_sections(curation) if curation else []
+    xml_content = build_doc_xml(row, source_field, source_path, transcript_text, creators_by_record_id, curation)
+    readable_text = "\n".join(
+        paragraph
+        for section in readable_sections
+        for paragraph in section["paragraphs"]
+    )
+    source_chars = compact_length(transcript_text)
+    readable_chars = compact_length(readable_text)
     preview = {
         "record_id": record_id,
         "platform": infer_platform(row),
@@ -444,8 +580,24 @@ def process_row(config, row, creators_by_record_id, args):
         "source_transcript_path": str(source_path),
         "source_field": source_field,
         "paragraphs": len(clean_transcript_paragraphs(transcript_text)),
+        "agent_assisted": bool(curation),
+        "source_chars": source_chars,
+        "readable_chars": readable_chars,
+        "readable_ratio": round(readable_chars / source_chars, 4) if source_chars else None,
+        "will_update_existing": bool(existing_url and args.update_existing and not args.overwrite),
         "will_overwrite": bool(existing_url and args.overwrite),
     }
+    if existing_url and args.update_existing and not args.overwrite:
+        if args.dry_run:
+            return {"status": "updated", "dry_run": True, "doc_url": existing_url, **preview}
+        run_docs_update_overwrite(
+            config,
+            existing_url,
+            xml_content,
+            attempts=args.retry_attempts,
+            base_delay=args.retry_delay_seconds,
+        )
+        return {"status": "updated", "doc_url": existing_url, **preview}
     if args.dry_run:
         return {"status": "created" if not existing_url else "updated", "dry_run": True, **preview}
 
@@ -478,6 +630,8 @@ def parse_args():
     parser.add_argument("--max-records", type=int, help="Maximum records to process. Default: 1 unless --record-id is set.")
     parser.add_argument("--dry-run", action="store_true", help="Preview selected records without creating docs or writing Base.")
     parser.add_argument("--overwrite", action="store_true", help=f"Overwrite existing {TRANSCRIPT_FIELD} URLs. Default skips non-empty values.")
+    parser.add_argument("--update-existing", action="store_true", help="Update an existing Feishu doc in place; create one when no URL exists.")
+    parser.add_argument("--curation-file", help="JSON mapping record IDs/platform video IDs to agent-written readable sections.")
     parser.add_argument("--parent-token", help="Optional Feishu folder/wiki parent token for created docs.")
     parser.add_argument("--parent-position", help="Optional parent position such as my_library.")
     parser.add_argument("--manifest-output", help="Optional manifest output path.")
@@ -504,12 +658,14 @@ def main():
         "field": None,
         "args": vars(args),
         "created": [],
+        "updated": [],
         "skipped": [],
         "failed": [],
         "summary": {},
     }
     try:
         manifest["field"] = ensure_transcript_field(config, dry_run=args.dry_run)
+        curations = load_curation_file(args.curation_file)
         creators_by_record_id = load_creators(config)
         rows = select_rows(load_video_rows(config), args)
         if not rows:
@@ -517,8 +673,8 @@ def main():
             write_json(manifest_path, manifest)
         for index, row in enumerate(rows):
             try:
-                result = process_row(config, row, creators_by_record_id, args)
-                bucket = "created" if result.get("status") in {"created", "updated"} else "skipped"
+                result = process_row(config, row, creators_by_record_id, curations, args)
+                bucket = result.get("status") if result.get("status") in {"created", "updated", "skipped"} else "skipped"
                 manifest[bucket].append(result)
                 print(json.dumps(result, ensure_ascii=False))
             except Exception as exc:
@@ -531,6 +687,7 @@ def main():
         manifest["ended_at"] = now_str()
         manifest["summary"] = {
             "created": len(manifest["created"]),
+            "updated": len(manifest["updated"]),
             "skipped": len(manifest["skipped"]),
             "failed": len(manifest["failed"]),
             "manifest_path": str(manifest_path),
