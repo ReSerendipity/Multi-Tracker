@@ -23,6 +23,9 @@ lark-auth-qrcode.png
 downloads/
 bilibili-download-test/
 
+# Local tools (ffmpeg copied from other projects)
+tools/
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

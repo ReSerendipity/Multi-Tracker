@@ -1,6 +1,6 @@
 # AI博主爬取
 
-Local ingestion scripts for tracking AI creators on Bilibili and Douyin, downloading recent videos, creating transcript artifacts, and syncing selected metadata back to Feishu Base.
+Local ingestion scripts for tracking AI creators on Bilibili, Douyin, Xiaohongshu, and Kuaishou, downloading recent videos, creating transcript artifacts, and syncing selected metadata back to Feishu Base.
 
 ## What Is Included
 
@@ -10,6 +10,10 @@ Local ingestion scripts for tracking AI creators on Bilibili and Douyin, downloa
 - `download_douyin_latest.py`: download latest videos from configured Douyin creators.
 - `sync_douyin_to_feishu.py`: sync local Douyin download artifacts into Feishu.
 - `enrich_douyin_feishu.py`: backfill Douyin insight fields from local artifacts.
+- `download_xiaohongshu_latest.py`: download latest videos from configured Xiaohongshu creators.
+- `sync_xiaohongshu_to_feishu.py`: sync local Xiaohongshu download artifacts into Feishu.
+- `download_kuaishou_latest.py`: download latest videos from configured Kuaishou creators.
+- `sync_kuaishou_to_feishu.py`: sync local Kuaishou download artifacts into Feishu.
 - `write_transcript_content_to_feishu.py`: write agent-authored transcript summaries and key points to Feishu, then verify them by readback.
 - `publish_transcript_docs_to_feishu.py`: create or update Feishu docs from local transcripts and write document URLs back to Base.
 - `.agents/skills/video-transcript-doc-writer/`: turn cleaned transcripts into structured, readable spoken-script curation JSON.
@@ -58,6 +62,18 @@ Run Douyin latest-video download:
 
 ```powershell
 python .\download_douyin_latest.py --videos-per-creator 1
+```
+
+Run Xiaohongshu latest-video download:
+
+```powershell
+python .\download_xiaohongshu_latest.py --from-feishu --videos-per-creator 1
+```
+
+Run Kuaishou latest-video download:
+
+```powershell
+python .\download_kuaishou_latest.py --from-feishu --videos-per-creator 1
 ```
 
 Preview transcript content writeback and doc publishing without writing Feishu:

@@ -1,0 +1,68 @@
+(async () => {
+  // 获取当前登录用户信息
+  const navResp = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+    credentials: 'include',
+    headers: { 'Referer': 'https://www.bilibili.com/' }
+  });
+  const navData = await navResp.json();
+  
+  if (navData.code !== 0) {
+    console.error('未登录！请先登录 B 站');
+    return;
+  }
+  
+  const mid = navData.data.mid;
+  const uname = navData.data.uname;
+  console.log(`当前用户: ${uname} (MID: ${mid})`);
+  
+  // 分页获取所有关注
+  const allFollowings = [];
+  let pn = 1;
+  const ps = 50;
+  let total = 0;
+  
+  while (true) {
+    const url = `https://api.bilibili.com/x/relation/followings?vmid=${mid}&pn=${pn}&ps=${ps}&order=desc&order_type=attention`;
+    const resp = await fetch(url, {
+      credentials: 'include',
+      headers: { 'Referer': 'https://www.bilibili.com/' }
+    });
+    const data = await resp.json();
+    
+    if (data.code !== 0) {
+      console.error(`获取失败: ${data.message}`);
+      break;
+    }
+    
+    total = data.data.total;
+    const list = data.data.list || [];
+    if (list.length === 0) break;
+    
+    for (const item of list) {
+      allFollowings.push({
+        name: item.uname,
+        mid: String(item.mid),
+      });
+    }
+    
+    console.log(`已获取 ${allFollowings.length}/${total} 个关注...`);
+    
+    if (allFollowings.length >= total) break;
+    pn++;
+    await new Promise(r => setTimeout(r, 300));
+  }
+  
+  // 输出结果
+  const result = JSON.stringify(allFollowings, null, 2);
+  console.log('\n===== 导出完成！复制下面的全部内容给我 =====');
+  console.log(result);
+  console.log('===== 结束 =====');
+  
+  // 同时复制到剪贴板（如果浏览器允许）
+  try {
+    await navigator.clipboard.writeText(result);
+    console.log('\n✅ 结果已自动复制到剪贴板，直接粘贴给我即可');
+  } catch (e) {
+    console.log('\n⚠️  自动复制失败，请手动选中并复制上面的 JSON 内容');
+  }
+})();

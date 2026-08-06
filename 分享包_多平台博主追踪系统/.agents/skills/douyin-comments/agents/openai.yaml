@@ -1,0 +1,4 @@
+interface:
+  display_name: "Douyin Comments"
+  short_description: "通过已登录Chrome导出抖音视频评论JSON文件"
+  default_prompt: "Use $douyin-comments to fetch comments for a Douyin video URL or aweme_id."
