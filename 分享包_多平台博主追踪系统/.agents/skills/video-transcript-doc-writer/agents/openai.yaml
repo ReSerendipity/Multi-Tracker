@@ -1,0 +1,7 @@
+interface:
+  display_name: "视频口播稿写作"
+  short_description: "将清洗转写稿整理为完整可读版口播稿"
+  default_prompt: "使用 $video-transcript-doc-writer 读取完整转写稿并生成 curation JSON。"
+
+policy:
+  allow_implicit_invocation: true
