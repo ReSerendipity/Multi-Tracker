@@ -19,6 +19,16 @@
 - `.agents/skills/video-transcript-doc-writer/`：将清洗后的转写稿转换为结构化的可读口播稿JSON。
 - `.agents/skills/`：项目本地的Codex技能，用于重复的爬取/评论工作流程。
 
+## 权威源码与导出副本说明
+
+本仓库有意保留核心下载/同步脚本的**三份被 git 跟踪的副本**，按文件名搜索会得到多份结果。其中只有**仓库根目录**是权威源码，另外两份是**只读的导出快照**。请始终修改根目录副本，仅当快照需要刷新时才从根目录复制过去。
+
+- **权威源码——仓库根目录**（本目录，与 `README.md`、`start.ps1`、`requirements.txt` 同级）。要修改的是根目录下的 `download_douyin_latest.py`、`sync_douyin_to_feishu.py`、`download_bili_following_latest.py`、`sync_bilibili_comments_to_feishu.py` 等。
+- `分享包_多平台博主追踪系统/`：**分享/投稿导出包**（其 `README.md` 自述为用于 TraeWork 活动投稿分享；自带 `LICENSE.md`、`CONTRIBUTING.md`、`docs/`，并含 `.agents/skills/` 的整份副本）。属于导出产物，从根目录复制再生成。
+- `repro-package/`：**B站最小复现包**（其 `README.md` 自述为“从完整项目里提取的 B站最小可用版本”，仅含少量脚本）。从根目录复制再生成。
+
+对任意脚本，权威路径都是仓库根目录下的文件；`分享包_多平台博主追踪系统/` 与 `repro-package/` 下的同名文件均为该根文件的下游快照。根目录 `.agents/skills/` 同样是权威技能源码。完整规则见 [`AGENTS.md`](./AGENTS.md)。
+
 ## 本地设置
 
 1. 复制示例配置文件并填入本地飞书多维表格信息：
