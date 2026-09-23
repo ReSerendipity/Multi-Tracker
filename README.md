@@ -19,6 +19,29 @@ Local ingestion scripts for tracking AI creators on Bilibili, Douyin, Xiaohongsh
 - `.agents/skills/video-transcript-doc-writer/`: turn cleaned transcripts into structured, readable spoken-script curation JSON.
 - `.agents/skills/`: project-local Codex skills for repeated crawl/comment workflows.
 
+## Source of Truth (Authoritative Files)
+
+This repository intentionally keeps **three git-tracked copies** of the core
+download/sync scripts, so searching by filename returns several hits. Only one
+is authoritative; the other two are **read-only export snapshots**. Always edit
+the root copy, and only re-copy into a snapshot when it needs refreshing.
+
+- **Authoritative source — the repository root** (this directory, next to
+  `README.md`, `start.ps1`, `requirements.txt`). The files to change are the
+  root-level `download_douyin_latest.py`, `sync_douyin_to_feishu.py`,
+  `download_bili_following_latest.py`, `sync_bilibili_comments_to_feishu.py`, and so on.
+- `分享包_多平台博主追踪系统/` — a **share/submission export bundle** (its own
+  `README.md` says it is packaged for a TraeWork 活动投稿分享; it carries its own
+  `LICENSE.md`, `CONTRIBUTING.md`, `docs/`, and a full copy of `.agents/skills/`).
+  Generated output; regenerate by copying from root.
+- `repro-package/` — a **minimal B站 reproduction extract** (its `README.md` calls it
+  “从完整项目里提取的 B站最小可用版本”; only a few scripts). Regenerate by copying from root.
+
+For any script, the authoritative path is the repository-root file; every copy
+under `分享包_多平台博主追踪系统/` or `repro-package/` is a downstream snapshot of that root file.
+The root `.agents/skills/` tree is likewise the authoritative skills source.
+See [`AGENTS.md`](./AGENTS.md) for the full rule.
+
 ## Local Setup
 
 1. Copy the example config and fill in local Feishu Base values:

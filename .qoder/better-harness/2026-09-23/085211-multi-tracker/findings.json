@@ -1,0 +1,175 @@
+{
+  "summary": {
+    "projectName": "AI博主爬取",
+    "locale": "zh-CN",
+    "modelId": "agent-work-loop-v4",
+    "reportContractVersion": 26,
+    "overview": "项目在文档、环境自检和可复用 Skill 上有较好基础，但同一批流水线脚本存在多份被 git 跟踪的副本，且核心下载/同步路径缺少可运行的相关校验，会让 agent 在改动时难以确定权威来源与验证信号。",
+    "aiAgentPractice": {
+      "inspectedSurfaces": [],
+      "coverageRows": [
+        {
+          "surface": "Skills",
+          "scopes": [
+            "Project",
+            "Plugin"
+          ],
+          "count": 9,
+          "paths": [
+            ".agents/skills/bili-daily-update-check/SKILL.md",
+            ".agents/skills/bili-following-latest/SKILL.md",
+            ".agents/skills/bilibili-comments/SKILL.md",
+            ".agents/skills/douyin-comments/SKILL.md",
+            ".agents/skills/video-transcript-doc-writer/SKILL.md",
+            "~/.qoder/plugins/cache/qoder-bundler/better-harness/skills/better-harness/SKILL.md",
+            "~/.qoder/plugins/cache/qoder-bundler/computer-use/skills/computer-use/SKILL.md",
+            "~/.qoder/plugins/cache/qoder-bundler/qoder-create-plugin/skills/create-plugin/SKILL.md",
+            "~/.qoder/plugins/cache/qoderapp-bundler/qoder-context/1.0.61.7f8d7bb7/skills/qoder-context-knowledge-plan/SKILL.md"
+          ]
+        },
+        {
+          "surface": "Hooks",
+          "scopes": [
+            "Plugin"
+          ],
+          "count": 5,
+          "paths": [
+            "~/.qoder/plugins/cache/qoderapp-bundler/qoder-context/1.0.61.7f8d7bb7/hooks/hooks.json"
+          ]
+        },
+        {
+          "surface": "MCP",
+          "scopes": [
+            "Plugin"
+          ],
+          "count": 2,
+          "paths": [
+            "~/.qoder/plugins/cache/qoder-bundler/computer-use/.mcp.json",
+            "~/.qoder/plugins/cache/qoderapp-bundler/qoder-context/1.0.61.7f8d7bb7/mcp.json"
+          ]
+        },
+        {
+          "surface": "Plugins",
+          "scopes": [
+            "Plugin"
+          ],
+          "count": 4,
+          "paths": [
+            "~/.qoder/plugins/cache/qoder-bundler/better-harness/.qoder-plugin/plugin.json",
+            "~/.qoder/plugins/cache/qoder-bundler/computer-use/.qoder-plugin/plugin.json",
+            "~/.qoder/plugins/cache/qoderapp-bundler/qoder-context/1.0.61.7f8d7bb7/.qoder-plugin/plugin.json",
+            "~/.qoder/plugins/cache/qoder-bundler/qoder-create-plugin"
+          ]
+        },
+        {
+          "surface": "Rules",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        },
+        {
+          "surface": "Commands",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        },
+        {
+          "surface": "Custom Agents",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        },
+        {
+          "surface": "Workflows",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        },
+        {
+          "surface": "Memories",
+          "scopes": [
+            "Project"
+          ],
+          "count": 0
+        }
+      ],
+      "repositorySourceRows": []
+    },
+    "assignmentSummaries": [],
+    "dimensions": [
+      {
+        "id": "task-understanding",
+        "label": "任务理解",
+        "score": 55,
+        "summary": "README 与多份运行指南把意图讲得较清楚，但没有标明多份被跟踪副本中哪一份是权威源码。",
+        "findingRefs": [
+          "canonical-copy-ambiguity"
+        ]
+      },
+      {
+        "id": "controlled-execution",
+        "label": "可控执行",
+        "score": 68,
+        "summary": "check_environment.py、start.ps1、requirements.txt 与 RUN_GUIDE 提供了可复现的启动与自检入口。",
+        "findingRefs": []
+      },
+      {
+        "id": "change-validation",
+        "label": "改动验证",
+        "score": 40,
+        "summary": "仅有一个被 pytest 采集的测试，且只覆盖转写稿内容；核心下载/同步路径没有可运行的相关校验。",
+        "findingRefs": [
+          "core-pipeline-no-runnable-check"
+        ]
+      },
+      {
+        "id": "reliable-delivery",
+        "label": "可靠交付",
+        "score": 52,
+        "summary": "工作树干净、纳入 git 管理，但没有 CI 或合并验收证据来确认改动被安全接受。",
+        "findingRefs": []
+      },
+      {
+        "id": "learning-capture",
+        "label": "经验沉淀",
+        "score": 45,
+        "summary": "Memory 扫描为空、完整性已复核，本窗口未观察到可比任务片段，既无改进可记也未构成缺陷。",
+        "findingRefs": []
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "canonical-copy-ambiguity",
+      "title": "流水线脚本存在多份被 git 跟踪的副本，改动时难辨权威来源",
+      "severity": "Medium",
+      "reason": "同一批脚本被 git 同时跟踪在仓库根目录（如 download_douyin_latest.py、sync_douyin_to_feishu.py）与 分享包_多平台博主追踪系统/ 目录下，.agents/skills 也在根目录和 分享包_多平台博主追踪系统/.agents/skills/ 各存一份，另有 repro-package/ 第三份；仓库没有 AGENTS.md，README 也未标明哪一份是权威源码、哪一份是导出快照。后果是：当被要求修改或运行某条下载/同步流水线时，无法确定应改哪一副本，容易编辑到非权威副本导致改动不生效或在副本间产生分叉。",
+      "expectedOutput": [
+        "Update the existing Document owner identified by the reviewed evidence and retain a focused validation result."
+      ],
+      "expectedArtifact": "Document",
+      "aiFixPrompt": "/better-harness fix this issue\n\n明确仓库中多份被 git 跟踪副本的权威来源，消除改动时该改哪一份的歧义。\n\n## 先做什么\n\n- 只读核对：仓库根脚本、分享包_多平台博主追踪系统/ 与 repro-package/ 三份副本的差异，确认哪一份是当前维护的权威源码\n- 在根 README 增加一节，或新增一份精简的 AGENTS.md，声明权威源码目录，并说明 分享包_多平台博主追踪系统/、repro-package/ 为导出快照（只读、随权威源码再生成）\n- 不删除、不合并、不移动任何文件；本次只做来源澄清\n\n## 验证\n\n- 依据说明，能唯一确定下载/同步脚本的权威文件路径\n- 对任一被点名脚本，说明其余副本与权威副本的关系（快照或再生成来源）",
+      "dimensionRefs": [
+        "task-understanding"
+      ]
+    },
+    {
+      "id": "core-pipeline-no-runnable-check",
+      "title": "核心下载/同步流水线缺少可运行的相关校验",
+      "severity": "Low",
+      "reason": "仓库中唯一能被 pytest 采集的测试是 tests/test_transcript_content_flow.py，仅覆盖转写稿内容；根目录的 11 个 _test_*.py 以下划线开头，既不符合 pytest 默认采集命名（test_*.py 或 *_test.py），也没有 pytest.ini/conftest 把它们纳入，因此它们看似测试却不会被执行，给出虚假的覆盖信号。package.json 没有 scripts，也没有任何 CI 配置。后果是：改动 download_*.py、sync_*.py 等核心路径时没有可复现的通过/失败信号——本次会话侧证据同样显示用户提到校验，但未观察到匹配的 lint/test 执行。",
+      "expectedOutput": [
+        "Update the existing Test owner identified by the reviewed evidence and retain a focused validation result."
+      ],
+      "expectedArtifact": "Test",
+      "aiFixPrompt": "/better-harness fix this issue\n\n为核心下载/同步流水线补一条能被采集运行的相关校验，避免以下划线命名、实际不会被 pytest 运行的脚本给出虚假信号。\n\n## 先做什么\n\n- 选一个最能代表核心路径的既有 _test_*.py 场景（例如某条 download 或 sync 的输入输出），改写为 tests/ 目录下可被 pytest 采集命名的用例\n- 用例只覆盖一个稳定边界（如构造输入、断言产出结构），不改动业务脚本逻辑\n- 若脚本依赖登录态或外部服务，用可注入的最小替身或跳过标记，保证离线也能采集运行\n\n## 验证\n\n- 运行 pytest tests/ 能采集到该用例并给出通过或失败\n- 说明该用例覆盖了哪条核心路径，以及哪些根目录脚本被替换或保留为手工脚本",
+      "dimensionRefs": [
+        "change-validation"
+      ]
+    }
+  ]
+}
