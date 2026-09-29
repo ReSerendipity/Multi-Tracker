@@ -32,3 +32,7 @@ Thumbs.db
 desktop.ini
 .idea/
 .vscode/
+
+# Node.js dependencies
+node_modules/
+
