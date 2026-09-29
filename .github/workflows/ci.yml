@@ -1,0 +1,54 @@
+# Multi-Tracker: syntax integrity + pytest for script-heavy Python repo
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  syntax:
+    name: Python syntax integrity (main modules; _* dev probes excluded)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile non-probe Python sources
+        run: |
+          python - <<'EOF'
+          import pathlib, sys
+          bad = []
+          for p in sorted(pathlib.Path('.').rglob('*.py')):
+              if p.name.startswith('_') or '.git' in p.parts:
+                  continue
+              try:
+                  compile(p.read_text(encoding='utf-8'), str(p), 'exec')
+              except SyntaxError as e:
+                  bad.append(f'{p}: line {e.lineno}: {e.msg}')
+          if bad:
+              print('\n'.join(bad), file=sys.stderr)
+              sys.exit(1)
+          print('syntax OK')
+          EOF
+
+  test:
+    name: Pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: python -m pip install --quiet pytest
+      - name: Run tests (repo root on sys.path via conftest)
+        run: python -m pytest tests/ -q
