@@ -1,4 +1,4 @@
-yt-dlp>=2026.7.4
+yt-dlp>=2026.8.19
 openai-whisper>=20250625
 torch>=2.13.0
 numpy>=2.4.6
