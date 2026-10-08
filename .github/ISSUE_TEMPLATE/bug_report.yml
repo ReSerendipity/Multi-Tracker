@@ -1,0 +1,76 @@
+name: "Bug report / 缺陷报告"
+description: "采集、转写、元数据或飞书写入环节出现错误时用它"
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请尽量给出可复现的最小命令。日志里请先抹掉真实账号、Cookie、飞书 token 与 record id。
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 受影响环节
+      options:
+        - 采集 - B站关注更新
+        - 采集 - 抖音
+        - 采集 - 小红书
+        - 采集 - 快手
+        - 下载 - yt-dlp
+        - 转写 - Whisper
+        - 元数据 / 表格写入
+        - 发布 - 飞书文档
+        - 其它 / 不确定
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现命令与步骤
+      description: "直接贴你跑的命令行（含参数）"
+      placeholder: |
+        python .\download_bili_following_latest.py --videos-per-creator 3
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为与日志
+      description: "完整 traceback 比一句“失败了”有用得多"
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: 运行环境
+      placeholder: "Windows 11 / Python 3.11 / torch 2.13 / WHISPER_MODEL=large-v3-turbo, WHISPER_DEVICE=cuda"
+    validations:
+      required: true
+  - type: dropdown
+    id: cdp
+    attributes:
+      label: 是否经过 CDP 浏览器桥
+      options:
+        - 否
+        - 是（抖音 / 小红书，走 DOUYIN_CDP_BRIDGE_PORT / XIAOHONGSHU_CDP_BRIDGE_PORT）
+        - 不确定
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: "日志与截图里已抹去凭据、Cookie、真实 record id"
+          required: true
+        - label: "已确认 `python -m pytest tests/ -q` 在干净状态下能通过（排除既有失败干扰）"
+          required: false

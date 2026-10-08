@@ -1,0 +1,51 @@
+name: "Feature request / 功能建议"
+description: "新增平台、新增字段、改流程编排等"
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决的问题
+      description: "先说场景，再说功能名。"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望的做法
+      placeholder: |
+        例如：给 download_xxx_latest.py 增加 --since-days N，只采集 N 天内的新视频，
+        并在写入飞书表格时带上采集时间戳列。
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 已考虑的替代方案
+      description: "包括目前手动的绕法（例如先跑 `_*.py` 探针脚本再人工合并）"
+    validations:
+      required: false
+  - type: dropdown
+    id: touches
+    attributes:
+      label: 会触及的环节
+      multiple: true
+      options:
+        - 采集脚本
+        - 转写 / Whisper
+        - 元数据与表格结构
+        - 飞书发布
+        - CI / 依赖
+        - 仅文档
+    validations:
+      required: true
+  - type: checkboxes
+    id: cost
+    attributes:
+      label: 代价确认
+      options:
+        - label: "接受该功能可能需要新增外部依赖（会进 requirements.txt / package.json）"
+          required: false
+        - label: "接受该功能可能改变飞书表格列结构（需同步已有数据）"
+          required: false
