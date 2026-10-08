@@ -36,3 +36,6 @@ desktop.ini
 # Node.js dependencies
 node_modules/
 
+
+# AI 工具链产物，不入库
+.qoder/
