@@ -44,13 +44,21 @@ See [`AGENTS.md`](./AGENTS.md) for the full rule.
 
 ## Local Setup
 
-1. Copy the example config and fill in local Feishu Base values:
+1. Create a virtual environment and install the Python dependencies:
+
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   ```
+
+2. Copy the example config and fill in local Feishu Base values:
 
    ```powershell
    Copy-Item .\feishu-base-config.example.json .\feishu-base-config.json
    ```
 
-2. Make sure the external CLIs used by the workflows are available in your shell:
+3. Make sure the external CLIs used by the workflows are available in your shell:
 
    - `python`
    - `lark-cli`
@@ -59,7 +67,13 @@ See [`AGENTS.md`](./AGENTS.md) for the full rule.
    - `whisper` for ASR post-processing
    - `node` for CDP-based comment tools
 
-3. Runtime outputs are intentionally ignored by git. Downloaded media, transcripts, manifests, browser profiles, QR codes, and local Feishu config stay on the local machine.
+4. Verify the environment before the first run:
+
+   ```powershell
+   python .\check_environment.py
+   ```
+
+5. Runtime outputs are intentionally ignored by git. Downloaded media, transcripts, manifests, browser profiles, QR codes, and local Feishu config stay on the local machine.
 
 ## Common Commands
 
@@ -109,3 +123,7 @@ python .\publish_transcript_docs_to_feishu.py --record-id YOUR_RECORD_ID --updat
 ## Codex Automation Example
 
 See [`CODEX_AUTOMATION_EXAMPLE.md`](./CODEX_AUTOMATION_EXAMPLE.md) for a Codex App daily automation example covering Bilibili/Douyin ingestion, machine transcription, agent-written readable spoken scripts, Feishu document publishing, manifest verification, and concise failure reporting.
+
+## License
+
+Released under the [Apache License 2.0](./LICENSE). Copyright 2026 ReSerendipity.
