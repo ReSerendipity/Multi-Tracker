@@ -21,9 +21,11 @@ Local ingestion scripts for tracking AI creators on Bilibili, Douyin, Xiaohongsh
 
 ## Source of Truth (Authoritative Files)
 
-This repository intentionally keeps **three git-tracked copies** of the core
-download/sync scripts, so searching by filename returns several hits. Only one
-is authoritative; the other two are **read-only export snapshots**. Always edit
+This repository intentionally keeps **up to three git-tracked copies** of the core
+download/sync scripts (the B站 pipeline is in all three locations; the
+抖音/小红书/快手 scripts only in the root and the share bundle), so searching by
+filename returns several hits. Only one
+is authoritative; the others are **read-only export snapshots**. Always edit
 the root copy, and only re-copy into a snapshot when it needs refreshing.
 
 - **Authoritative source — the repository root** (this directory, next to

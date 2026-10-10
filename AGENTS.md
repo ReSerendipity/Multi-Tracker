@@ -8,7 +8,7 @@ source of truth. Edit it; treat the other two as read-only generated snapshots.
 
 | Location | Role | Edit directly? |
 | --- | --- | --- |
-| `<repo root>/*.py` | **Authoritative source** — the code you actually run and maintain (alongside `README.md`, `start.ps1`, `requirements.txt`, `docs`). | **Yes** |
+| `<repo root>/*.py` | **Authoritative source** — the code you actually run and maintain (alongside `README.md`, `start.ps1`, `requirements.txt`). | **Yes** |
 | `分享包_多平台博主追踪系统/` | Share / submission **export bundle** (its `README.md` self-describes as a TraeWork 活动投稿分享 package; it carries its own `LICENSE.md`, `CONTRIBUTING.md`, `docs/`, and a full copy of `.agents/skills/`). | No — snapshot; regenerate by copying from root |
 | `repro-package/` | Minimal B站 **reproduction extract** (its `README.md` self-describes as “从完整项目里提取的 B站最小可用版本”; only a handful of scripts). | No — snapshot; regenerate by copying from root |
 
