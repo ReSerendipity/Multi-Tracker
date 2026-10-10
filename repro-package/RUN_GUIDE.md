@@ -81,7 +81,7 @@ notepad feishu-base-config.json
 
 ```powershell
 # 方法1: npm 安装
-npm install -g @anthropic/lark-cli
+npm install -g @larksuite/cli
 
 # 方法2: 从飞书开放平台下载
 # https://open.feishu.cn/document/home/develop-a-gadget/development-tools
