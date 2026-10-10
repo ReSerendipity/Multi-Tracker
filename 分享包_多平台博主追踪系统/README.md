@@ -102,7 +102,7 @@ Copy-Item .\feishu-base-config.example.json .\feishu-base-config.json
 
 ```powershell
 # 安装（如未安装）
-npm install -g @anthropic/lark-cli
+npm install -g @larksuite/cli
 
 # 登录（扫码）
 lark-cli auth login --profile default
