@@ -1,5 +1,8 @@
 name: Release
 
+# 治理规范 §10.2 口径（2026-10-18 收敛）：
+#   tag 驱动 → 远端构建资产 + SHA256SUMS → 建 **draft** Release 并挂资产 → 人工审核后 published。
+#   本地不产出任何发布交付物（§10.1 远端优先）。
 on:
   push:
     tags:
@@ -10,10 +13,28 @@ permissions:
 
 jobs:
   release:
-    name: Publish GitHub Release
+    name: Build assets & create draft release
     runs-on: ubuntu-latest
     steps:
-      - name: Create release from tag
+      - name: Checkout tagged commit
+        uses: actions/checkout@v4
+
+      - name: Build source archive and SHA256SUMS
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          ARCHIVE="Multi-Tracker-${TAG}.tar.gz"
+          git archive --format=tar.gz --prefix="Multi-Tracker-${TAG}/" -o "${ARCHIVE}" HEAD
+          sha256sum "${ARCHIVE}" > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create draft release with assets
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" --verify-tag --generate-notes --draft --title "$TAG"
+          gh release upload "$TAG" "Multi-Tracker-${TAG}.tar.gz" SHA256SUMS.txt
+          echo "::notice::draft release $TAG created with assets — publish it after manual review."
