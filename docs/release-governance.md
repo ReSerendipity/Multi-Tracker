@@ -28,13 +28,13 @@
 
 - 遵循 **Keep a Changelog**：`Added / Changed / Fixed / Deprecated / Removed / Security`。
 - 每次合并 `main` 在 `[Unreleased]` 追加；type 映射 `feat→Added`、`fix→Fixed`、`refactor→Changed`；发版时 `[Unreleased]` → `[VERSION] - YYYY-MM-DD`。
-- **本仓现状**：`CHANGELOG.md` **不存在**（`gh api` 返回 404，属实测事实）。补建时机与负责人：`待定（负责人 + 触发条件）`。
-  - 该欠账不改变 §10.2 的口径；补建前 `release.yml` 依赖 `--generate-notes` 自动生成发行说明（见 §3）。
+- **本仓现状（2026-10-18 更新）**：根级 `CHANGELOG.md` **已建立**（此前 `gh api` 返回 404，本轮补建）。当前仅保留 `[Unreleased]` 段——本仓尚无版本位 / tag（见 §1），条目按 Keep a Changelog 归类并逐一回溯到 commit。
+  - `release.yml` 仍以 `--generate-notes` 自动生成发行说明（见 §3）；CHANGELOG 与发行说明并行，互不替代。
 
 ## 3. 发布流程（远端）
 
 1. 确认变更已合入 `main`。
-2. 落/更新 `[Unreleased]` 条目（在 §2 补建 CHANGELOG 之前为「待补」）。
+2. 落/更新根级 `CHANGELOG.md` 的 `[Unreleased]` 条目（见 §2）。
 3. 同步版本位（见 §1；当前无版本位，为「待定」）。
 4. 本地打 tag 并推送：`git tag v<X.Y.Z>` → `git push origin v<X.Y.Z>`。
 5. 远端凭 tag 触发 **`.github/workflows/release.yml`**：触发条件 `on: push: tags: ["v*"]`（即推送以 `v` 开头的 tag 时触发）。
@@ -71,7 +71,7 @@
 ## 7. 发布前检查清单
 
 - [ ] 版本位全部同步（本仓当前无版本位，见 §1；若已引入则须逐项核对）
-- [ ] CHANGELOG 已改版本 + 日期（**本仓当前无 CHANGELOG，为待补项**，见 §2）
+- [ ] 根级 `CHANGELOG.md` 的 `[Unreleased]` 已更新（本仓尚无版本位，暂不落 `[VERSION] - YYYY-MM-DD`，见 §2）
 - [ ] `ci.yml` 两项检查通过：`Python syntax integrity`（非探针 `*.py` 可编译）+ `Pytest`（`python -m pytest tests/ -q`）
 - [ ] 本地打 tag 并推送 `v<X.Y.Z>`，确认远端 `release.yml` 跑绿
 - [ ] **本地未产出任何发布交付物**（全部远端构建）
@@ -82,7 +82,7 @@
 | 项 | 本仓实测现状 | 待收敛方向 |
 |---|---|---|
 | 发布总纲 | 本文件（`docs/release-governance.md`）为首次落地的本仓版 | 已按 §10 收敛，无其它发布文档需合并 |
-| CHANGELOG | **不存在**（404） | 补建，署名与触发条件待定 |
+| CHANGELOG | **已建立**（根级 `CHANGELOG.md`，仅 `[Unreleased]`，条目可回溯 commit） | 每次合并 `main` 在 `[Unreleased]` 追加（§10.2） |
 | 版本位 | **不存在任何版本声明** | 引入后回填 §1 |
 | 发布链触发 | `release.yml`，`push: tags: ["v*"]` | 符合 tag 驱动 |
 | 发布产物 | 无资产，直接 published Release，`--generate-notes` | 是否改 draft 流程待定 |
