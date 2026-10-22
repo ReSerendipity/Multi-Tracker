@@ -1,3 +1,6 @@
+<!-- governance:agent-contract v1 -->
+> 完整契约：[docs/agent-contract.md](docs/agent-contract.md)
+
 # AGENTS.md — Repository Guidance
 
 ## Authoritative Source vs. Duplicate Copies
