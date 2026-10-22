@@ -1,3 +1,12 @@
+> **状态：暂时归档（Temporary Archive）｜2026-10-23**
+>
+> 本仓库处于 GitHub 只读归档状态。这是**暂时归档**，不是永久归档，也不代表项目终止。
+> 归档期间，代码、提交历史以及已有的 Release / Pages 保持可访问；公开仓可克隆、Star、Fork，私有仓仅限现有协作者。不能提交代码、发起 Issue / PR、评论或发布新版本。
+> 恢复开发时，由仓库所有者解除归档（unarchive），更新本声明，并同步修改治理台账中的 `lifecycle`。
+> 治理口径见 [ReSerendipity/.github 治理规范 §15.7](https://github.com/ReSerendipity/.github/blob/main/governance/REPOSITORY_GUIDELINES.md)。
+
+---
+
 # AI博主爬取
 
 Local ingestion scripts for tracking AI creators on Bilibili, Douyin, Xiaohongshu, and Kuaishou, downloading recent videos, creating transcript artifacts, and syncing selected metadata back to Feishu Base.
